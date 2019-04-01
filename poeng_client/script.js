@@ -40,17 +40,19 @@ const init = () => {
 	ws.onmessage = (msg) => handleResponse(msg.data);
 	ws.onopen = () => ws.send("register");
 	window.onbeforeunload = () => sendMessage("exit");
-	document.body.onkeypress = handleKeyPress;
+	window.addEventListener('keydown', handleKeyPress);
 }
 
 const handleKeyPress = (event) => {
 	switch (event.key) {
 		case "j":
+    case "ArrowDown":
 			data.me.y += 1;
 			data.me.y = Math.min(data.me.y, data.config.height - data.config.padHeight / 2);
 			sendMessage(`move ${data.me.y}`)
 			break;
 		case "k":
+    case "ArrowUp":
 			data.me.y -= 1;
 			data.me.y = Math.max(data.me.y, data.config.padHeight / 2);
 			sendMessage(`move ${data.me.y}`)

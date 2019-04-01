@@ -39,13 +39,8 @@ pub fn run(config: Config) {
         loop {
             {
                 let mut games_guard = games.lock().unwrap();
-                for i in (0..games_guard.len()).rev() {
-                    if games_guard[i].is_active() {
-                        games_guard[i].tick();
-                    } else {
-                        games_guard.remove(i as usize);
-                    }
-                }
+                games_guard.retain(Game::is_active);
+                for g in games_guard.iter_mut() { g.tick() }
             }
 
             thread::sleep(Duration::from_millis(20));
@@ -154,14 +149,11 @@ fn response(
             None => "err".to_string(),
         },
         Message::Exit(id) => {
-            for i in (0..games_guard.len()).rev() {
-                if id == games_guard[i].left_player.id || id == games_guard[i].right_player.id {
-                    games_guard.remove(i as usize);
-                    return "ok".to_string();
-                }
-            }
-
-            "err".to_string()
+            games_guard.retain(move |g| {
+                id != g.left_player.id &&
+                id != g.right_player.id
+            });
+            "ok".to_string()
         }
     }
 }
